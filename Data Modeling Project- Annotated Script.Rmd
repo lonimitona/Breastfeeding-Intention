@@ -1,0 +1,818 @@
+---
+title: "Assignment A2 - Annotated Script"
+author: '2149508'
+date: '2022-07-11'
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r}
+library(tidyverse) #set of packages for performing statistical transformations with data
+library(lubridate) #for parsing date-time data
+library(table1) #for publication ready statistical tables
+library(knitr) #for report generation
+library(gtsummary) #for summarizing tables for descriptive statistics
+library(rpart.plot) #machine learning algorithm for decision trees
+library(rpart) #for drawing decision trees
+library(caret) #for confusion matrix
+library(survival) #for survival analysis
+library(survminer)#for survival plots
+```
+
+###  Let's access the csv files and explore the data
+```{r}
+wales_data <- read.csv('Born in Wales Data June 2022.csv')
+head(wales_data)
+```
+#Here we can see that the default for most of the variables is that they are character variables although a majority contain categorical data and some contain date-time data. The column names are too long and need to be adjusted. We don't need the last column which asks the participants to submit the questionnaire, so we will exclude that. We will also not be needing the WIMD columns.
+
+
+### Let's exclude the less useful columns
+```{r}
+wales_data_2022 <- wales_data[, -c(68,69,70,71,73)]
+
+```
+
+
+### Let's rename the columns to shorter names which are easier to read and understand
+```{r}
+column_names = c('Patient_ID', 'Start_date', 'EDD', 'Language', 'Ethnicity', 'Nationality', 'Marital_status', 'Gender', 'Covid_symptoms', 'Start_of_symptoms', 'Kind_of_symptoms', 'Treatment_taken', 'Test_taken', 'Low_mood_while_preg', 'Low_interest_in_activities', 'Depressed_or_hopeless', 'Trouble_sleep_or_too_much_sleep', 'Tiredness', 'Poor_appetite_or_overeating', 'Feel_bad_abt_self_or_failing_family', 'Trouble_concentrating', 'slow_movement_speech_fidget_restless', 'Thoughts_of_self_harm', 'Smoking', 'Alcohol', 'Nervous_or_anxious', 'Unable_to_stop_worry', 'Worrying_too_much', 'Trouble_relaxing', 'Restlessness', 'Annoyed_or_irritable', 'Fear_of_unknown', 'Physical_activity_at_work', 'Physical_activity_sports', 'Cycling_work_leisure', 'Walking_work_leisure', 'Housework_childcare', 'Gardening_DIY', 'Walking_pace', 'Wgt_b4_preg_kg', 'hgt_cm', 'Stress_in_preg', 'Relationship_issues', 'Legal_finance_issues', 'Victim_of_violence_crime_or_loved_one_is_victim', 'illness_of_loved_one', 'death_of_loved_one', 'is_event_covid_related', 'emotional_finance_support_at_this_time', 'scale_of_stress_at_this_time', 'satisfaction_with_healthcare_support_at_preg', 'effect_of_covid_on_birth_type', 'Type_of_maternity_care_received', 'Experience_with_midwife_feeling_abt_preg', 'mode_of_feeding_intent', 'Other_children', 'No_of_children', 'Age_of_children', 'Occupation', 'Education_level', 'Employment_status', 'Length_work_hrs', 'No_in_household', 'Household_income', 'Contact_with_others_no_touch', 'Touch_contact_with_others', 'Accuracy_of_contact_with_others', 'View_on_vaccine_while_preg')
+colnames(wales_data_2022) <- column_names
+```
+
+
+### Let's view the adjusted column names
+```{r}
+head(wales_data_2022)
+```
+
+
+### Now let's change all the columns that contain categorical data from character to factor variables.
+```{r}
+wales_data_2022$Language <- as.factor(wales_data_2022$Language)
+
+wales_data_2022$Ethnicity <- as.factor(wales_data_2022$Ethnicity)
+
+wales_data_2022$Nationality <- as.factor(wales_data_2022$Nationality)
+
+wales_data_2022$Marital_status <- as.factor(wales_data_2022$Marital_status)
+
+wales_data_2022$Gender <- as.factor(wales_data_2022$Gender)
+
+wales_data_2022$Covid_symptoms <- as.factor(wales_data_2022$Covid_symptoms)
+
+wales_data_2022$Treatment_taken <- as.factor(wales_data_2022$Treatment_taken)
+
+wales_data_2022$Test_taken <- as.factor(wales_data_2022$Test_taken)
+
+wales_data_2022$Low_mood_while_preg <- as.factor(wales_data_2022$Low_mood_while_preg)
+
+wales_data_2022$Low_interest_in_activities <- as.factor(wales_data_2022$Low_interest_in_activities)
+
+wales_data_2022$Depressed_or_hopeless <- as.factor(wales_data_2022$Depressed_or_hopeless)
+
+wales_data_2022$Trouble_sleep_or_too_much_sleep <- as.factor(wales_data_2022$Trouble_sleep_or_too_much_sleep)
+
+wales_data_2022$Tiredness <- as.factor(wales_data_2022$Tiredness)
+
+wales_data_2022$Poor_appetite_or_overeating <- as.factor(wales_data_2022$Poor_appetite_or_overeating)
+
+wales_data_2022$Feel_bad_abt_self_or_failing_family <- as.factor(wales_data_2022$Feel_bad_abt_self_or_failing_family)
+
+wales_data_2022$Trouble_concentrating <- as.factor(wales_data_2022$Trouble_concentrating)
+
+wales_data_2022$slow_movement_speech_fidget_restless <- as.factor(wales_data_2022$slow_movement_speech_fidget_restless)
+
+wales_data_2022$Thoughts_of_self_harm <- as.factor(wales_data_2022$Thoughts_of_self_harm)
+
+wales_data_2022$Smoking <- as.factor(wales_data_2022$Smoking)
+
+wales_data_2022$Alcohol <- as.factor(wales_data_2022$Alcohol)
+
+wales_data_2022$Nervous_or_anxious <- as.factor(wales_data_2022$Nervous_or_anxious)
+
+wales_data_2022$Unable_to_stop_worry <- as.factor(wales_data_2022$Unable_to_stop_worry)
+
+wales_data_2022$Worrying_too_much <- as.factor(wales_data_2022$Worrying_too_much)
+
+wales_data_2022$Trouble_relaxing <- as.factor(wales_data_2022$Trouble_relaxing)
+
+wales_data_2022$Restlessness <- as.factor(wales_data_2022$Restlessness)
+
+wales_data_2022$Annoyed_or_irritable <- as.factor(wales_data_2022$Annoyed_or_irritable)
+
+wales_data_2022$Fear_of_unknown <- as.factor(wales_data_2022$Fear_of_unknown)
+
+wales_data_2022$Physical_activity_at_work <- as.factor(wales_data_2022$Physical_activity_at_work)
+
+wales_data_2022$Physical_activity_sports <- as.factor(wales_data_2022$Physical_activity_sports)
+
+wales_data_2022$Cycling_work_leisure <- as.factor(wales_data_2022$Cycling_work_leisure)
+
+wales_data_2022$Walking_work_leisure <- as.factor(wales_data_2022$Walking_work_leisure)
+
+wales_data_2022$Housework_childcare <- as.factor(wales_data_2022$Housework_childcare)
+
+wales_data_2022$Gardening_DIY <- as.factor(wales_data_2022$Gardening_DIY)
+
+wales_data_2022$Walking_pace <- as.factor(wales_data_2022$Walking_pace)
+
+wales_data_2022$Stress_in_preg <- as.factor(wales_data_2022$Stress_in_preg)
+
+wales_data_2022$Relationship_issues <- as.factor(wales_data_2022$Relationship_issues)
+
+wales_data_2022$Legal_finance_issues <- as.factor(wales_data_2022$Legal_finance_issues)
+
+wales_data_2022$Victim_of_violence_crime_or_loved_one_is_victim <- as.factor(wales_data_2022$Victim_of_violence_crime_or_loved_one_is_victim)
+
+wales_data_2022$illness_of_loved_one <- as.factor(wales_data_2022$illness_of_loved_one)
+
+wales_data_2022$death_of_loved_one <- as.factor(wales_data_2022$death_of_loved_one)
+
+wales_data_2022$is_event_covid_related <- as.factor(wales_data_2022$is_event_covid_related)
+
+wales_data_2022$emotional_finance_support_at_this_time <- as.factor(wales_data_2022$emotional_finance_support_at_this_time)
+
+wales_data_2022$effect_of_covid_on_birth_type <- as.factor(wales_data_2022$effect_of_covid_on_birth_type)
+
+wales_data_2022$Type_of_maternity_care_received <- as.factor(wales_data_2022$Type_of_maternity_care_received)
+
+wales_data_2022$mode_of_feeding_intent <- as.factor(wales_data_2022$mode_of_feeding_intent)
+
+wales_data_2022$Other_children <- as.factor(wales_data_2022$Other_children)
+
+wales_data_2022$Education_level <- as.factor(wales_data_2022$Education_level)
+
+wales_data_2022$Employment_status <- as.factor(wales_data_2022$Employment_status)
+
+wales_data_2022$Length_work_hrs <- as.factor(wales_data_2022$Length_work_hrs)
+
+wales_data_2022$Household_income <- as.factor(wales_data_2022$Household_income)
+
+wales_data_2022$Accuracy_of_contact_with_others <- as.factor(wales_data_2022$Accuracy_of_contact_with_others)
+
+wales_data_2022$View_on_vaccine_while_preg <- as.factor(wales_data_2022$View_on_vaccine_while_preg)
+
+wales_data_2022$satisfaction_with_healthcare_support_at_preg <- as.factor(wales_data_2022$satisfaction_with_healthcare_support_at_preg)
+
+wales_data_2022$scale_of_stress_at_this_time <- as.factor(wales_data_2022$scale_of_stress_at_this_time)
+```
+
+
+### Let's see the adjusted variables
+```{r}
+str(wales_data_2022)
+```
+#Here we see that we can now easily access the different levels of the categorical variables. But some variables are showing up to 14 levels which is a lot. There might be duplicate levels. 
+
+
+### Let's see all the levels of the categorical variables
+```{r}
+lapply(wales_data_2022, levels)
+```
+
+### Let's group the levels
+```{r}
+wales_data_2022$Language <- recode(wales_data_2022$Language, 'Bilingual Welsh and English ' = 'English', 'English and Welsh' = 'English', 'Bilingual Wel/Eng' = 'English', 'Equal welsh/English' = 'English', 'Greek' = 'Other', 'Waray waray' = 'Other', 'Spanish ' = 'Other', 'Italian' = 'Other', 'Portuguese ' = 'Other', 'Polish' = 'Other', 'Swahili' = 'Other')
+
+wales_data_2022$Ethnicity <- recode(wales_data_2022$Ethnicity, 'Chinese' = 'Asian', 'Prefer not to say' = 'Other')
+
+wales_data_2022$Nationality <- recode(wales_data_2022$Nationality, 'American' = 'Other', 'Brazilian' = 'Other', 'Filipino' = 'Other', 'Greek' = 'European', 'Indian' = 'Other', 'Irish' = 'British', 'New Zealand' = 'Other', 'Prefer not to say' = 'Other', 'Welsh ' = 'Welsh', 'Other' = 'Dual British and other nationality')
+
+wales_data_2022$Marital_status <- recode(wales_data_2022$Marital_status, 'Dating ' = 'Dating', 'Engaged ' = 'Engaged', 'Partner- lives in army accommodation and at home when off ' = 'Living with partner/civil partnership', 'Prefer not to say' = 'Other')
+
+wales_data_2022$Gender  <- recode(wales_data_2022$Gender, 'Bisexual?' = 'Bisexual', 'Heterosexual or straight?' = 'Heterosexual or straight', 'Homosexual or lesbian?' = 'Homosexual or lesbian', 'Pansexual' = 'Homosexual or lesbian', 'Prefer not to say' = 'Other')
+
+wales_data_2022$Test_taken  <- recode(wales_data_2022$Test_taken, 'No, not given a test' = 'No', 'No, not tested but a health professional diagnosed me as having Coronavirus' = 'No', 'Pre 2020' = 'No', 'Yes, tested negative' = 'Yes (Negative)', 'Yes, tested positive' = 'Yes (Positive)')
+
+wales_data_2022$Smoking  <- recode(wales_data_2022$Smoking, 'I have smoked but occasionally when younger. ' = 'No', 'I smoke aroung 15 a day' = 'Yes', 'I smoke e-cigarettes' = 'Yes', 'I used but I stopped before I was pregnant' = 'No', 'I used to but I stopped when I knew I was pregnant' = 'No', 'I used to, but I stopped before I was pregnant' = 'No', 'I used to, but I stopped when I knew I was pregnant' = 'No', 'No, never smoked' = 'No', 'Quit 5 years ago' = 'No', 'Stopped smoking 17 years ago. ' = 'No', 'Used to casually smoke when drinking but not for many years' = 'No', 'Yes I smoke, less than 5 cigarettes a day' = 'Yes', 'Yes I smoke, less than 5 cigarettes a week' = 'Yes', 'Yes I smoke, more than 5 cigarettes a week' = 'Yes')
+
+wales_data_2022$Physical_activity_at_work  <- recode(wales_data_2022$Physical_activity_at_work, 'I am not in employment (e.g. retired, retired for health reasons, unemployed, full-time carer etc.)' = 'None', 'I am not in employment (e.g. stay at home parent, unemployed, full-time carer etc.)' = 'None', 'I spend most of my time at work sitting (such as in an office)' = 'None', 'I spend most of my time at work standing or walking. However, my work does not require much intense physical effort (e.g. shop assistant, hairdresser, security guard, childminder, etc.)' = 'Mild', 'My work involves definite physical effort including handling of heavy objects and use of tools (e.g. cleaner, hospital nurse, gardener, postal delivery workers etc.)' = 'Moderate', 'My work involves vigorous physical activity including handling of very heavy objects (e.g. construction worker, refuse collector, etc.)' = 'Intense')
+
+wales_data_2022$Type_of_maternity_care_received  <- recode(wales_data_2022$Type_of_maternity_care_received, 'Already have baby' = 'Other', 'Awaiting decision based on previous birth' = 'Other', 'Both ' = 'Both', 'Both midwife and consultant ' = 'Both', 'Both. Started with midwife, then referred to consultant and then discharged back to midwife.' = 'Both', 'But both parties believe the other should be caring ' = 'Other', 'Community midwife/health visitor' = 'Midwife led care', 'Consultant led but at 30 weeks yet to see a consultant' = 'Consultant led care', 'Consultant led then midwife led in last weeks' = 'Both', 'Consultant led then midwife led in last weeks' = 'Both', 'Consultant on occassion but midwife led care' = 'Both', 'Currently both. Will be confirmed which one leads at next scan' = 'Both', 'Diabetic midwife led care ' = 'Midwife led care', 'Dont know yet' = 'Other', 'Dual care plus fetal medicine care' = 'Both', 'Early 5 weeks yet to meet midwife ' = 'Other', 'First appointment next week but will be consultant lead' = 'Consultant led care', 'Gave birth 10 months ago ' = 'Other', 'Given birth already' = 'Other', 'Health visitor ' = 'Other', 'I donåt know yet' = 'Other','Mainly midwife with consultant towards the end' = 'Both', 'Midwife and Consultant' = 'Both', 'Midwife and consultant led care' = 'Both', 'Midwife and present but meeting consultant in june' = 'Both', 'Mixture of both' = 'Both', 'N/A' = 'None', 'None ' = 'None', 'Not sure yet' = 'Other', 'Rainbow clinic' = 'Other', 'Shared care' = 'Both', 'Too early not yet booked will be CLC' = 'Other', 'Was consultant care' = 'Consultant led care', 'Not sure yet I\'m yet to have my 12 week scan' = 'Other')
+
+wales_data_2022$mode_of_feeding_intent  <- recode(wales_data_2022$mode_of_feeding_intent, 'Breast and expressed milk via bottle' = 'Breast milk only', 'Breast if all well. If not fed is best either way ' = 'Breast and bottle', 'Breast if possible ' = 'Breast milk only', 'Planned breastfeeding, ended up formula feeding' = 'Other', 'Dont know yet' = 'Don\'t know yet')
+
+wales_data_2022$Education_level <- recode(wales_data_2022$Education_level, '2 nvqs ' = 'Vocational qualifications', 'Bachelor of Science in nursing. Qualified nurse in the Philippines and UK' = 'University Degree', 'CACHE L5' = 'Vocational qualifications', 'Clinical doctorate' = 'University higher degree', 'Currently studying degree ' = 'University degree', 'Currently studying Nursing Degree' = 'University degree', 'Dip he' = 'University degree', 'DipHE' = 'University degree', 'Diploma ' = 'University degree', 'Diploma of Higher Education' = 'University degree', 'Diploma of higher education ' = 'University degree', 'Doctorate' = 'University higher degree', 'Exams at age 16 (GCSE or equivalent)' = 'Secondary Education', 'Exams at age 18 (A level or equivalent)' = 'Secondary Education', 'Higher national diploma ' = 'University degree', 'Master?s Degree ' = 'University higher degree', 'Masters' = 'University higher degree', 'None' = 'Other', 'None ' = 'Other', 'NVQ via work' = 'Vocational qualifications', 'PGCE' = 'University higher degree', 'Phd' = 'University higher degree','PhD' =  'University higher degree', 'Post grad' = 'University higher degree', 'University Degree' = 'University degree')
+
+wales_data_2022$Employment_status  <- recode(wales_data_2022$Employment_status, 'No I am on maternity leave now' = 'Not working', 'No, I am a stay at home parent' = 'Not working', 'No, I am a student' = 'Not working', 'No, I am unemployed' = 'Not working', 'No, I can not do my work in lockdown (furlouged or business closed in lockdown)' = 'Not working', 'Yes, I am a key worker so working outside the home' = 'Working', 'Yes, I am working from home' = 'Working', 'Yes, working outside the home/ in the office' = 'Working')
+
+wales_data_2022$Length_work_hrs  <- recode(wales_data_2022$Length_work_hrs, '35 hours a week' = 'Full time', 'Fixed regular hours part-time' = 'Part-time', 'I choose my own hours' = 'Part-time', 'Self employed. Whenever I.l can' = 'Other', 'Usually full time but signed off with hyperemisis gravidarum currently' = 'Other', 'Variable hours part-time' = 'Part-time', 'When required with no guarantee of hours' = 'Part-time', 'Zero hour contract' = 'Other')
+
+wales_data_2022$Household_income  <- recode(wales_data_2022$Household_income, '†œ50,000 +' = '> £50,000', '150,000' = '> £50,000', 'Between †œ10,000-†œ19,999' = '£10,000 - £50,000', 'Between †œ20,000-†œ29,999' = '£10,000 - £50,000', 'Between †œ30,000-†œ39,999' = '£10,000 - £50,000', 'Between †œ40,000-†œ49,999' = '£10,000 - £50,000', 'Between œ10,000-œ19,999' = '£10,000 - £50,000', 'Between œ20,000-œ29,999' = '£10,000 - £50,000', 'Between œ30,000-œ39,999' = '£10,000 - £50,000', 'Between œ40,000-œ49,999' = '£10,000 - £50,000', 'Both me and my husband are nurses earning œ31,534 each (before tax) yearly' = '£10,000 - £50,000', 'Less than †œ10,000' = '< £10,000', 'Less than œ10,000' = '< £10,000', 'Monthly less than œ5k' = '< £10,000', 'œ200,000' = '> £50,000', 'œ50,000 +' = '> £50,000', 'Perfer not to say' = 'Other', 'Prefer not to say' = 'Other')
+
+wales_data_2022$Alcohol  <- recode(wales_data_2022$Alcohol, 'Hardly drant prior to pregnancy. Had none during pregnancy ' = 'No', 'I only drink once or twice a year, I doesn\'t appeal to me but if I\'m in the mood I would drink when not pregnant ' = 'No', 'Just on the odd night out, hardly anything' = 'No', 'Never during pregnant but never a massive drinker anway ' = 'No', 'No, have in the past' = 'No', 'No, I have never drunk alcohol' = 'No', 'Not for a few years' = 'No', 'Not for a few years' = 'No', 'Occasionally before pregnancy' = 'No', 'Occasionally before pregancy' = 'No', 'On very few occasions, but not since I have been pregnant ' = 'No', 'Only on special occasions' = 'Yes', 'Rarely, perhaps 3-4 times a year' = 'Yes', 'Very rarely before pregnancy' = 'No', 'Yes, about once per week' = 'Yes', 'Yes, but I stopped before I was pregnant' = 'No', 'Yes, I stopped as soon as I knew I was pregant' = 'No', 'Yes, I stopped as soon as I knew I was pregnant' = 'No', 'Yes, very occasionally now' = 'Yes', 'Yes but maybe 2/3 a year' = 'Yes') 
+
+wales_data_2022$satisfaction_with_healthcare_support_at_preg <- recode(wales_data_2022$satisfaction_with_healthcare_support_at_preg, '1' = '1 (Least satisfied)', '2' = '2', '3' = '3', '4' ='4', '5' = '5 (Most satisfied)')
+
+```
+#After grouping the levels/categories, we can see that there are empty cells in almost all the variables. This is because some questions were not relevant to some observations and in some cases the paticiant didn't answer those questions, so we have many blank spaces. But there are some observations where none of the questions were answered and this will not be useful for our analysis. So let's figure out a way to deal with them.
+
+
+### Let's check for the number of empty cells in each column
+```{r}
+colSums(is.na(wales_data_2022))
+```
+#Some columns are returning no empty cells when they actually have multiple empty cells. It seems R is not recognizing the blank cells as empty. So let's fill all the blank cells with NA
+
+
+### Fill all blank cells with NAs
+```{r}
+wales_data_2022 <- wales_data_2022 %>% mutate_all(na_if,"")
+```
+
+
+### Set threshold to remove rows that have NAs that are more than 60
+```{r}
+delete.na <- function(DF, n=0) {
+  DF[rowSums(is.na(DF)) <= n,]
+}
+wales_data_2022 <- delete.na(wales_data_2022, 60)
+```
+
+
+### Now let's see the empty cells in each column
+```{r}
+colSums(is.na(wales_data_2022))
+```
+
+
+### Recode and aggregate set of questions for Low mood (Depression), Anxiety, Stress and Physical Activity
+```{r}
+#Depression and Anxiety
+wales_data_2022 <- wales_data_2022 %>% 
+    mutate_at(c('Low_interest_in_activities', 'Depressed_or_hopeless', 'Trouble_sleep_or_too_much_sleep', 'Tiredness', 'Poor_appetite_or_overeating', 'Feel_bad_abt_self_or_failing_family', 'Trouble_concentrating', 'slow_movement_speech_fidget_restless', 'Thoughts_of_self_harm', 'Nervous_or_anxious', 'Unable_to_stop_worry', 'Worrying_too_much', 'Trouble_relaxing', 'Restlessness', 'Annoyed_or_irritable', 'Fear_of_unknown'),
+              funs(recode(., 'Not at all' = 0, 'Several days' = 1, 'More than half the days' = 2, 'Nearly every day' = 3, 'Nearly everyday' = 3)))
+
+#Physical activity
+wales_data_2022 <- wales_data_2022 %>% 
+    mutate_at(c('Physical_activity_sports', 'Cycling_work_leisure', 'Walking_work_leisure', 'Housework_childcare', 'Gardening_DIY'), 
+              funs(recode(., 'None' = 0, 'Some but less than 1 hour' = 1, '1 hour but less than 3 hours' = 2, '3 hours or more' = 3)))
+
+#Stress
+wales_data_2022 <- wales_data_2022 %>% 
+    mutate_at(c('Relationship_issues', 'Legal_finance_issues', 'Victim_of_violence_crime_or_loved_one_is_victim', 'illness_of_loved_one', 'death_of_loved_one', 'is_event_covid_related', 'emotional_finance_support_at_this_time'), 
+              funs(recode(., 'No ' = 'No')))
+
+#Aggregate Depression scores
+wales_data_2022 <- wales_data_2022 %>% 
+    mutate(Depression = rowMeans(select(., Low_interest_in_activities, Depressed_or_hopeless, Trouble_sleep_or_too_much_sleep, Tiredness, Poor_appetite_or_overeating, Feel_bad_abt_self_or_failing_family, Trouble_concentrating, slow_movement_speech_fidget_restless, Thoughts_of_self_harm), na.rm = TRUE))
+
+#Aggregate Anxiety scores
+wales_data_2022 <- wales_data_2022 %>% 
+    mutate(Anxiety = rowMeans(select(., Nervous_or_anxious, Unable_to_stop_worry, Worrying_too_much, Trouble_relaxing, Restlessness, Annoyed_or_irritable, Fear_of_unknown), na.rm = TRUE))
+
+#Aggregate Physical activity scores
+wales_data_2022 <- wales_data_2022 %>%
+    mutate(Physical_activity_leisure_housework = rowMeans(select(., Physical_activity_sports, Cycling_work_leisure, Walking_work_leisure, Housework_childcare, Gardening_DIY), na.rm = TRUE))
+```
+
+
+### Some categories were not grouped, let's tidy those up
+```{r}
+wales_data_2022$Nationality[wales_data_2022$Nationality == 'Dual British and other nationality'] <- 'Other'
+wales_data_2022 %>% count(Nationality)
+
+wales_data_2022$Education_level[wales_data_2022$Education_level == 'University Degree'] <- 'University degree'
+wales_data_2022 %>% count(Education_level)
+
+wales_data_2022$Type_of_maternity_care_received[wales_data_2022$Type_of_maternity_care_received == ('Not sure yet, I\'m yet to have my 12 week scan')] <- 'Other'
+wales_data_2022 %>% count(Type_of_maternity_care_received)
+
+wales_data_2022$effect_of_covid_on_birth_type[wales_data_2022$effect_of_covid_on_birth_type == ('Hadnåt thought much about type of brith I wanted but main thing is restrictions relating to partner being able to stay throughout ')] <- 'Don\'t know yet'
+wales_data_2022 %>% count(effect_of_covid_on_birth_type)	
+```
+
+### Let's change the variables that contain date data from characters to date-time variables
+```{r}
+wales_data_2022$Start_date <- dmy(wales_data_2022$Start_date)
+
+wales_data_2022$EDD <- dmy(wales_data_2022$EDD)
+
+wales_data_2022$Start_of_symptoms <- dmy(wales_data_2022$Start_of_symptoms)
+```
+
+### Weight is in metres, let's convert it to cm and calculate the BMI for each observation
+```{r}
+wales_data_2022 <- wales_data_2022 %>% 
+    mutate(BMI = Wgt_b4_preg_kg / (hgt_cm / 100) ^ 2)
+
+#round BMI value to 1 decimal place
+wales_data_2022$BMI <- round(wales_data_2022$BMI, digits = 1)
+```
+
+
+```{r}
+summary(wales_data_2022)
+```
+### All the blank spaces have been filled with NAs. But we also note that because we grouped the levels, there are now redundant levels. Let's take care of them.
+```{r}
+wales_data_2022 <- droplevels(wales_data_2022)
+```
+
+
+### Let's group the occupations
+```{r}
+healthcare <- c('Hospital', 'Mental health', 'Midwife', 'Therapist', 'Paramedic', 'Nursing', 'Nursery', 'Paediatric', 'Optical', 'Outreach', 'Pharmacy', 'Physiotherapist', 'Physiotherapy', 'Support worker', 'Social', 'Special needs', 'Nurse', 'NHS', 'Dietitian', 'Radiographer', 'Psychologist', 'Psychiatric', 'Carer', 'GP', 'Doctor', 'Ambulance', 'Care', 'Childcare', 'Charity', 'Disability', 'Phlebotomist', 'Clinical', 'Domestic abuse', 'Family practitioner', 'Dental', 'Lab', 'Suicide prevention', 'Therapy', 'Children', 'Support worked', 'Health Visitor', 'Recovery practitioner', 'Contact Lens Optician', 'Dispensing Optician')
+
+# extract the list of matching words
+x <- sapply(healthcare, function(x) grepl(tolower(x), tolower(wales_data_2022$Occupation)))
+
+# paste the matching words together
+wales_data_2022$healthcare <- apply(x, 1, function(i) paste0(names(i)[i], collapse = ","))
+
+civil_service <- c('Lecturer', 'Teacher', 'Academic', 'Education', 'Teaching', 'Tutor', 'Account', 'Accountant', 'Customer service', 'Admin', 'Manager', 'Engineer', 'Relations', 'Bank', 'Finance', 'Business support', 'Business Development', 'Cabin', 'Civil servant', 'Clerical', 'Civilian', 'Communication', 'Commissioning', 'Company', 'Compliance', 'Advisor', 'Counil', 'Conveyancer', 'Data', 'Trainer', 'Analyst', 'Developer', 'Operator', 'Ecologist', 'Editor', 'Environmental onsultant', 'Estate agent', 'Executive', 'Flood', 'Floor manager', 'Fraud', 'Geologist', 'Graphic Designer', 'Housing', 'HR', 'Insurance', 'Interpreter', 'Investment', 'Veterinary', 'Lettings', 'Line operator', 'Microbiologist', 'Office', 'Paraplanner', 'PCSO', 'Police', 'Personal assistant', 'Performance', 'Probation', 'Research', 'Project Manager', 'Coach', 'Receptionist', 'Recruitment', 'Referencing','Scientist', 'Secretary', 'Procurement', 'Solicitor', 'Speech', 'Sports', 'Statistics', 'Supervisor', 'Surveyor', 'Travel agent', 'Participation', 'environmental consultant', 'Environmental Consultant',	'Environmental consultant', 'Operating department practitioner', 'Play worker', 'Production technician', 'Project Manger', 'Project worker', 'Public servant', 'Vet', 'Team Leader', 'Sports person', 'Staff grade OMFS', 'Volunteer', 'Head of Department in the Arts', 'Recruiter', 'Council worker environment', 'Customer assistant', 'Customer loyalty representative', 'Domestic services', 'Front of house team leader/host')
+
+x <- sapply(civil_service, function(x) grepl(tolower(x), tolower(wales_data_2022$Occupation)))
+
+wales_data_2022$civil_service <- apply(x, 1, function(i) paste0(names(i)[i], collapse = ","))
+
+blue_collar <- c('Sales', 'Retail', 'Bar staff', 'Chef', 'Artist', 'Director', 'Associate', 'Assessment', 'Beauty', 'Cafe worker','Cake maker', 'Catering', 'Checkout', 'Call centre', 'Cleaner', 'Designer', 'Dog', 'Factory worker', 'Fast food', 'Farmer', 'Joiner', 'Management', 'Pub', 'Qualifications', 'Quality assurance', 'Public servant', 'cook', 'Security', 'Shop', 'Waitress', 'Warehouse', 'Waitress/ outdoor expedition leader', 'Warehouse worker & cleaner', 'Bar assistant', 'Bar staff ', 'Bar Staff', 'hairdresser', 'Hairdresser', 'Host', 'Make up artist', 'Stores person')
+
+x <- sapply(blue_collar, function(x) grepl(tolower(x), tolower(wales_data_2022$Occupation)))
+
+wales_data_2022$blue_collar <- apply(x, 1, function(i) paste0(names(i)[i], collapse = ","))
+
+homemaker <- c('Housewife', 'Mum', 'Mother', 'Stay at home', 'House wife', 'Home maker', 'Home maker', 'Home person', 'homemaker', 'House person')
+
+x <- sapply(homemaker, function(x) grepl(tolower(x), tolower(wales_data_2022$Occupation)))
+
+wales_data_2022$homemaker <- apply(x, 1, function(i) paste0(names(i)[i], collapse = ","))
+
+unemployed <- c('Unemployed', 'student', 'unemployment', 'N/a', 'N/A', 'N9ne', 'Na', 'not working due 2 Ill health')
+
+x <- sapply(unemployed, function(x) grepl(tolower(x), tolower(wales_data_2022$Occupation)))
+
+wales_data_2022$unemployed <- apply(x, 1, function(i) paste0(names(i)[i], collapse = ","))
+
+self_employed <- c('Business owner', 'Self employed')
+
+x <- sapply(self_employed, function(x) grepl(tolower(x), tolower(wales_data_2022$Occupation)))
+
+wales_data_2022$self_employed <- apply(x, 1, function(i) paste0(names(i)[i], collapse = ","))
+
+wales_data_2022[str_detect(wales_data_2022$healthcare, pattern = paste0(healthcare,collapse = "|")) , "Occupation"] <- "Healthcare"
+
+wales_data_2022[str_detect(wales_data_2022$civil_service, pattern = paste0(civil_service,collapse = "|")) , "Occupation"] <- "Civil Service"
+
+wales_data_2022[str_detect(wales_data_2022$blue_collar, pattern = paste0(blue_collar,collapse = "|")) , "Occupation"] <- "Blue Collar worker"
+
+wales_data_2022[str_detect(wales_data_2022$homemaker, pattern = paste0(homemaker,collapse = "|")) , "Occupation"] <- "Home maker"
+
+wales_data_2022[str_detect(wales_data_2022$self_employed, pattern = paste0(self_employed,collapse = "|")) , "Occupation"] <- "Self employed"
+
+wales_data_2022[str_detect(wales_data_2022$unemployed, pattern = paste0(unemployed,collapse = "|")) , "Occupation"] <- "Unemployed"
+
+wales_data_2022 %>% count(Occupation)
+
+```
+
+
+### Drop the columns that are no more needed
+```{r}
+wales_data_2022 <- wales_data_2022 %>% 
+    select(-healthcare, -civil_service, -homemaker, -blue_collar, -self_employed, -unemployed)
+```
+
+### Recode questions relating to COVID-19
+```{r}
+wales_data_2022$Treatment_taken  <- recode(wales_data_2022$Treatment_taken, 'Stayed at home took, prescription medicine from GP' = 'Yes', 'Stayed at home, did not need medicine' = 'No', 'Stayed at home, took over the counter medicine' = 'Yes')
+
+wales_data_2022$effect_of_covid_on_birth_type <- recode(wales_data_2022$effect_of_covid_on_birth_type, 'Dont know yet' = 'Don\'t know yet', 'Hadnåt thought much about type of brith I wanted but main thing is restrictions relating to partner being able to stay throughout' = 'Don\'t know yet', 'I am not sure what I want at this current time' = 'Don\'t know yet', 'I donåt know they wonåt talk to me about it until Iåm closer to my due date' = 'Don\'t know yet', 'I donåt know yet ' = 'Don\'t know yet', 'I dont know if my option will be removed by the time I am due, but at the moment they have been ' = 'Don\'t know yet', 'I feel that it is too soon for me to answer this question as I am only 10 weeks pregnant ' = 'Don\'t know yet', 'I have not decided on my birth plan but my choices are being heavily swayed by Covid related worries' = 'Yes', 'I was able to have the birth I wanted, though the neighbouring hospital shut down the midwife led birth centre and gone birthing team as they were short staffed. I was also warned that the team here were short staffed and so needed to be aware that I might not be able to have what I want when it comes to delivery. I was able to proceed as normal, but this obviously causes some worries when approaching birth.' = 'No', 'No, it has not changed the type of birth I intend to have (home birth, midwife unit, water birth, c-section, hospital consultant led)' = 'No', 'Not sure as of yet ' = 'Don\'t know yet', 'Not sure how it will affect my birth choices. ' = 'Don\'t know yet', 'Yes, because I can\'t have who I want with me and have to suffer alone' = 'Yes', 'Yes, I have changed the type of birth I intend to have (e.g. home birth, midwife unit, water birth, C-section, hospital consultant lead)' = 'Yes', 'Yes, my options have been removed and I do not have the choice to have the birth I would choose.' = 'Yes', 'Yes, my options have been removed and I do not have the choice to have the birth I would chose.' = 'Yes')
+
+#extract the counts of the listed COVID-19 symptoms
+sample <- wales_data_2022 %>% select(Patient_ID, Kind_of_symptoms) %>% na.omit
+
+sample$no_of_symptoms <- lengths(strsplit(sample$Kind_of_symptoms, ";"))
+
+sample <- sample %>% select(-Kind_of_symptoms)
+
+wales_data_2022 <- wales_data_2022 %>% left_join(sample, by = 'Patient_ID')
+
+wales_data_2022$no_of_symptoms <- as.factor(wales_data_2022$no_of_symptoms)
+
+wales_data_2022 %>% count(no_of_symptoms)
+
+
+
+```
+
+
+### Create a variable to group Household number, Number of Children, BMI, number of people contacted, Depression, Anxiety, Physical activity
+```{r}
+wales_data_2022 <- wales_data_2022 %>% 
+    mutate(household = 0) %>% mutate(household = ifelse(No_in_household == 0, '0', ifelse(No_in_household == 1, '1 - 2', ifelse(No_in_household == 2, '1 - 2', ifelse(No_in_household >= 3, '3 and above', household))))) 
+
+wales_data_2022 %>% count(household)
+
+wales_data_2022 <- wales_data_2022 %>% 
+    mutate(children = 0) %>% mutate(children = ifelse(No_of_children == 0, '0', ifelse(No_of_children == 1, '1 - 2', ifelse(No_of_children == 2, '1 - 2', ifelse(No_of_children >= 3, '3 and above', children))))) 
+
+wales_data_2022$children <- as.factor(wales_data_2022$children)
+
+wales_data_2022 %>% count(children)
+
+wales_data_2022 <- wales_data_2022 %>% 
+    mutate(BMI_range = 0) %>% mutate(BMI_range = ifelse(BMI < 18.5, 'Underweight', ifelse(BMI >= 18.5 & BMI <= 24.9, 'Healthy weight', ifelse(BMI >= 25 & BMI <= 29.9, 'Overweight', ifelse(BMI >= 30, 'Obese', BMI_range))))) 
+
+wales_data_2022 %>% count(BMI_range)
+
+wales_data_2022 <- wales_data_2022 %>% 
+    mutate(contact_no_touch = 0) %>% mutate(contact_no_touch = ifelse(Contact_with_others_no_touch < 5, 'Less than 5 people', ifelse(Contact_with_others_no_touch >= 5, 'More than 5 people', contact_no_touch))) 
+
+wales_data_2022 %>% count(contact_no_touch)
+
+wales_data_2022 <- wales_data_2022 %>% 
+    mutate(contact_touch = 0) %>% mutate(contact_touch = ifelse(Touch_contact_with_others < 5, 'Less than 5 people', ifelse(Touch_contact_with_others >= 5, 'More than 5 people', contact_touch))) 
+
+wales_data_2022 %>% count(contact_touch)
+
+wales_data_2022 <- wales_data_2022 %>% 
+    mutate(Depression_scale = 0) %>% mutate(Depression_scale = ifelse(Depression == 0, '0 (Not Depressed)', ifelse(Depression > 0 & Depression <= 1, '1', ifelse(Depression >= 1 & Depression <= 2, '2', ifelse(Depression >= 2 & Depression >= 3, '3 (Very Depressed)', Depression_scale))))) 
+
+wales_data_2022$Depression_scale[wales_data_2022$Depression_scale == '0'] <- '0 (Not Depressed)'
+
+wales_data_2022 %>% count(Depression_scale)
+
+wales_data_2022 <- wales_data_2022 %>% 
+    mutate(Anxiety_scale = 0) %>% mutate(Anxiety_scale = ifelse(Anxiety == 0, '0 (Not Anxious)', ifelse(Anxiety > 0 & Anxiety <= 1, '1', ifelse(Anxiety >= 1 & Depression <= 2, '2', ifelse(Anxiety >= 2 & Anxiety >= 3, '3 (Very Anxious)', Anxiety_scale))))) 
+
+wales_data_2022$Anxiety_scale[wales_data_2022$Anxiety_scale == '0'] <- '0 (Not Anxious)'
+
+wales_data_2022 %>% count(Anxiety_scale)
+
+wales_data_2022 <- wales_data_2022 %>% 
+    mutate(PA_scale = 0) %>% mutate(PA_scale = ifelse(Physical_activity_leisure_housework == 0, '0 (Not Active)', ifelse(Physical_activity_leisure_housework > 0 & Physical_activity_leisure_housework <= 1, '1', ifelse(Physical_activity_leisure_housework >= 1 & Physical_activity_leisure_housework <= 2, '2', ifelse(Physical_activity_leisure_housework >= 2 & Physical_activity_leisure_housework >= 3, '3 (Very Active)', PA_scale))))) 
+
+wales_data_2022$PA_scale[wales_data_2022$PA_scale == '0'] <- '0 (Not Active)'
+
+wales_data_2022 %>% count(PA_scale)
+
+wales_data_2022$scale_of_stress_at_this_time  <- recode(wales_data_2022$scale_of_stress_at_this_time, '1 ' = '1 (Not at all)', '10' = '10 (Overwhelming)')
+
+wales_data_2022 %>% count(scale_of_stress_at_this_time)
+
+```
+
+
+### Let's access the follow up data
+```{r}
+wales_data_followup <- read.csv('Born in Wales Follow-up Data June 2022.csv')
+
+head(wales_data_followup)
+```
+
+
+### The dates are in character format, let's convert them to date-time format
+```{r}
+# Change date format to match that of the main data set
+wales_data_followup$Start.time <- ymd(wales_data_followup$Start.time)
+
+wales_data_followup$Delivery.date <- ymd(wales_data_followup$Delivery.date)
+
+wales_data_followup$Started.breastfeeding <- ymd(wales_data_followup$Started.breastfeeding)
+
+wales_data_followup$Stopped.breastfeeding <- ymd(wales_data_followup$Stopped.breastfeeding)
+
+head(wales_data_followup)
+
+```
+
+
+### Create variable for those who initiated breastfeeding
+```{r}
+wales_data_followup <- wales_data_followup %>% mutate(initiate_bf = 0) %>% mutate(initiate_bf = ifelse(!is.na(Started.breastfeeding), 'Yes', ifelse(is.na(Started.breastfeeding), 'No', initiate_bf))) 
+```
+
+
+### Create variable for breastfeeding duration
+```{r}
+### end of followup is one year after delivery
+wales_data_followup$end_of_follow_up <- wales_data_followup$Delivery.date %m+% years(1)
+
+### Breastfeeding duration for those who started breastfeeding and stopped before end of follow-up
+wales_data_followup$duration_bf <- difftime(wales_data_followup$Stopped.breastfeeding, wales_data_followup$Started.breastfeeding, units = c("days"))
+
+### Breastfeeding duration for those who started breastfeeding stopped and didn't stop, input NA for those who didn't breastfeed at all
+wales_data_followup <- wales_data_followup %>% mutate(duration_bf = ifelse(!is.na(Started.breastfeeding) & is.na(Stopped.breastfeeding), interval(Started.breastfeeding, end_of_follow_up) %/% days(1), ifelse(is.na(Started.breastfeeding) & is.na(Stopped.breastfeeding), NA, duration_bf)))
+
+### Censor the data
+wales_data_followup <- wales_data_followup %>% mutate(censor = 0) %>% mutate(censor = ifelse(!is.na(Started.breastfeeding) & is.na(Stopped.breastfeeding), 1, ifelse(!is.na(Started.breastfeeding) & !is.na(Stopped.breastfeeding), 1, ifelse(is.na(Started.breastfeeding) & is.na(Stopped.breastfeeding), 0, censor))))
+
+### View censored data
+surv_censored <- Surv(wales_data_followup$duration_bf, wales_data_followup$censor)
+surv_censored
+
+```
+
+
+### survival plot
+```{r}
+surv <- survfit(Surv(duration_bf, censor) ~ 1, data = wales_data_followup)
+summary(surv)
+
+ggsurvplot(surv, conf.int=TRUE, ylim=c(0, 1), 
+           title='Breastfeeding Surival up to a year',
+           ylab='Cumulative Survival', xlab='Days',
+           legend='none')
+
+#Probability of breasting up to a year after delivery
+summary(survfit(Surv(duration_bf, censor) ~ 1, data = wales_data_followup), times = 365)
+
+```
+The probability of a woman breastfeeding up to a year is 30%
+
+### Merge followup data to the main dataset
+```{r}
+#select only needed columns
+wales_data_followup <- wales_data_followup %>% select(STUDY_ID, initiate_bf, duration_bf, censor)
+
+#change column name to match that of main dataset
+col_names = c('Patient_ID', 'initiate_bf', 'duration_bf', 'censor')
+colnames(wales_data_followup) <- col_names
+
+#merge datasets
+wales_data_2022 <- wales_data_2022 %>% full_join(wales_data_followup, by ='Patient_ID')
+
+```
+
+
+### Cox regression model
+#### Length of work hours and breastfeeding duration
+```{r}
+surv1 <- survfit(Surv(duration_bf, censor) ~ Length_work_hrs, data = wales_data_2022)
+
+print(surv1)
+
+ggsurvplot(surv1, data=wales_data_2022, 
+           legend.labs=c('Full time','Part-time', 'Other'))
+
+#Cox regression
+coxph(Surv(duration_bf, censor) ~ Length_work_hrs, data = wales_data_2022) %>% 
+  gtsummary::tbl_regression(exp = TRUE) 
+
+```
+
+
+### Marital status and breastfeeding duration
+```{r}
+#Cox regression
+coxph(Surv(duration_bf, censor) ~ Marital_status, data = wales_data_2022) %>% 
+  gtsummary::tbl_regression(exp = TRUE)
+
+```
+
+
+### Let's draw the demographic table to summarize the characteristics 
+```{r}
+#re-ordering the levels
+wales_data_2022$Language <- 
+  factor(wales_data_2022$Language, levels=c('English', 'Welsh', 'Other'))
+
+wales_data_2022$Ethnicity <- 
+  factor(wales_data_2022$Ethnicity, levels=c('White', 'Asian', 'Mixed', 'Other'))
+
+wales_data_2022$Nationality <- 
+  factor(wales_data_2022$Nationality, levels=c('British','Welsh', 'European', 'Other'))
+
+wales_data_2022$Marital_status <- 
+  factor(wales_data_2022$Marital_status, levels=c('Married','Living with partner/civil partnership', 'Single', 'Dating', 'Engaged', '(Other)'))
+
+wales_data_2022$Gender <- 
+  factor(wales_data_2022$Gender, levels=c('Heterosexual or straight','Bisexual', 'Homosexual or lesbian', 'Other'))
+
+wales_data_2022$mode_of_feeding_intent <- 
+  factor(wales_data_2022$mode_of_feeding_intent, levels=c('Breast milk only', 'Breast and bottle', 'Bottle milk only', 'Don\'t know yet', 'Other'))
+
+wales_data_2022$Occupation <- 
+  factor(wales_data_2022$Occupation, levels=c('Civil Service', 'Healthcare', 'Blue Collar worker', 'Home maker', 'Self employed', 'Unemployed'))
+
+
+wales_data_2022$Education_level <- 
+  factor(wales_data_2022$Education_level, levels=c('Secondary Education', 'University degree', 'University higher degree', 'Vocational qualifications', 'Other'))
+
+wales_data_2022$Employment_status <- 
+  factor(wales_data_2022$Employment_status, levels=c('Working', 'Not working'))
+
+wales_data_2022$Household_income <- 
+  factor(wales_data_2022$Household_income, levels=c('< £10,000', '£10,000 - £50,000', '> £50,000', 'Other'))
+
+wales_data_2022$Other_children <- 
+  factor(wales_data_2022$Other_children, levels=c('No', 'Yes', 'Prefer not to say'))
+
+wales_data_2022$BMI_range <- 
+  factor(wales_data_2022$BMI_range, levels=c('Underweight', 'Healthy weight', 'Overweight', 'Obese'))
+
+wales_data_2022$effect_of_covid_on_birth_type <- factor(wales_data_2022$effect_of_covid_on_birth_type, levels=c('No', 'Yes', 'Don\'t know yet'))
+
+wales_data_2022$Test_taken <- factor(wales_data_2022$Test_taken, levels=c('No', 'Yes (Negative)', 'Yes (Positive)'))
+
+wales_data_2022$Other_children <- 
+  factor(wales_data_2022$Other_children, levels=c('No', 'Yes', 'Prefer not to say'))
+
+wales_data_2022$Walking_pace <- 
+  factor(wales_data_2022$Walking_pace, levels=c('Slow pace', 'Steady average pace', 'Brisk pace', 'Fast pace'))
+
+wales_data_2022$Stress_in_preg <- 
+  factor(wales_data_2022$Stress_in_preg, levels=c('No', 'Yes', 'Prefer not to say'))
+
+wales_data_2022$Treatment_taken <- 
+  factor(wales_data_2022$Treatment_taken, levels=c('No', 'Yes'))
+
+#Adjust label names for variables
+table_1 <- wales_data_2022 %>% 
+    select(-Patient_ID, -Start_date, -EDD, -Age_of_children, -No_of_children, -No_in_household, -BMI)
+
+table1::label(table_1$Marital_status) <- "Marital status"
+
+table1::label(table_1$mode_of_feeding_intent) <- "Mode of feeding intent"
+
+table1::label(table_1$Other_children) <- "Woman has other children"
+
+table1::label(table_1$Employment_status) <- "Employment status"
+
+table1::label(table_1$Education_level) <- "Educational level"
+
+table1::label(table_1$Household_income) <- "Household income"
+
+table1::label(table_1$household) <- "Number of Household members (excluding mother)"
+
+table1::label(table_1$BMI_range) <- "Weight before pregnancy"
+
+table1::label(table_1$children) <- "Number of Children"
+
+table1::label(table_1$Covid_symptoms) <- "Had COVID-19 Symptoms"
+
+table1::label(table_1$Kind_of_symptoms) <- "Number of symptoms"
+
+table1::label(table_1$Treatment_taken) <- "Treatment taken"
+
+table1::label(table_1$Test_taken) <- "Test taken"
+
+table1::label(table_1$effect_of_covid_on_birth_type) <- "If COVID-19 will affect planned birth type"
+
+table1::label(table_1$contact_no_touch) <- "Number of people outside houshold mother met but no close contact "
+
+table1::label(table_1$contact_touch) <- "Number of people outside houshold mother had close contact with"
+
+table1::label(table_1$Type_of_maternity_care_received) <- "Type of Maternity care received during pregnancy"
+
+table1::label(table_1$satisfaction_with_healthcare_support_at_preg) <- "Level of satisfaction with Healthcare support during pregnancy"
+
+table1::label(table_1$Length_work_hrs) <- "Work Type"
+
+table1::label(table_1$Physical_activity_at_work) <- "Physical activity at work"
+
+table1::label(table_1$Walking_pace) <- "Walking pace"
+
+table1::label(table_1$no_of_symptoms) <- "Number of symptoms experienced"
+
+table1::label(table_1$PA_scale) <- "Level of Physical activity (including sports, leisure and house chores"
+
+table1::label(table_1$Depression_scale) <- "Level of Depression"
+
+table1::label(table_1$Anxiety_scale) <- "Level of Anxiety"
+
+table1::label(table_1$scale_of_stress_at_this_time) <- "Scale of stress"
+
+table1::label(table_1$Low_mood_while_preg) <- "Low mood experienced during pregnancy"
+
+table1::label(table_1$Stress_in_preg) <- "Stress experienced during pregnancy"
+
+table1::label(table_1$Relationship_issues) <- "Relationship issues experienced during pregnancy"
+
+table1::label(table_1$Legal_finance_issues) <- "Experience with legal or financial issues"
+
+table1::label(table_1$Victim_of_violence_crime_or_loved_one_is_victim) <- "Experience of violence or crime to mother or loved one"
+
+table1::label(table_1$illness_of_loved_one) <- "Illness of loved one"
+
+table1::label(table_1$death_of_loved_one) <- "Death of loved one"
+
+table1::label(table_1$is_event_covid_related) <- "If Illness or Death of loved one is COVID-19 related"
+
+table1::label(table_1$emotional_finance_support_at_this_time) <- "If emotional or Financial support was received at this time"
+
+table1::label(table_1$initiate_bf) <- "Initiated Breastfeeding"
+
+
+table1::table1(~Language + Ethnicity + Nationality + Marital_status + Gender + Education_level + BMI_range + mode_of_feeding_intent + initiate_bf + Other_children + children + Occupation + Employment_status + Length_work_hrs + Household_income + household + Covid_symptoms + no_of_symptoms + Treatment_taken + Test_taken + effect_of_covid_on_birth_type + contact_no_touch + contact_touch + Type_of_maternity_care_received + satisfaction_with_healthcare_support_at_preg + Physical_activity_at_work + PA_scale + Walking_pace + Low_mood_while_preg + Depression_scale + Anxiety_scale + Stress_in_preg + Relationship_issues + Legal_finance_issues + Victim_of_violence_crime_or_loved_one_is_victim + illness_of_loved_one + death_of_loved_one + is_event_covid_related + emotional_finance_support_at_this_time + scale_of_stress_at_this_time + Smoking + Alcohol, data = table_1, topclass="Rtable1-grid")
+
+```
+
+
+### Create Logistic Regression table to summarize the associations
+```{r}
+### Create binary variable for intent to breastfeed
+wales_data_2022$Intent_BF <- recode(wales_data_2022$mode_of_feeding_intent, 'Breast milk only' = 1, 'Breast and bottle' = 1, 'Bottle milk only' = 0, 'Other' = 0, 'Don\'t know yet' = 0)
+
+wales_data_2022$Intent_BF <- as.factor(wales_data_2022$Intent_BF)
+
+#Select variables for regression model
+model <- wales_data_2022 %>% select(Marital_status, Education_level, BMI_range, Low_mood_while_preg, Stress_in_preg, Relationship_issues, Legal_finance_issues, Victim_of_violence_crime_or_loved_one_is_victim, illness_of_loved_one, death_of_loved_one, is_event_covid_related, emotional_finance_support_at_this_time, Intent_BF, children, Smoking, Alcohol)
+
+
+mod1 <- glm(Intent_BF ~ Marital_status + Education_level + BMI_range + Low_mood_while_preg + Stress_in_preg, 
+            data = model, family = binomial)
+t1 <- tbl_regression(mod1, exponentiate = TRUE)
+t1
+
+mod2 <- glm(Intent_BF ~ Relationship_issues + Legal_finance_issues + Victim_of_violence_crime_or_loved_one_is_victim + illness_of_loved_one + death_of_loved_one, data = model, family = binomial)
+t2 <- tbl_regression(mod2, exponentiate = TRUE)
+t2
+
+mod3 <- glm(Intent_BF ~ is_event_covid_related + emotional_finance_support_at_this_time + children + Smoking + Alcohol, 
+            data = model, family = binomial)
+t3 <- tbl_regression(mod3, exponentiate = TRUE)
+t3
+
+```
+
+
+### Decision tree
+```{r}
+dt <- wales_data_2022 %>% select(Patient_ID, Marital_status, Education_level, BMI_range, Other_children, Household_income, Type_of_maternity_care_received, satisfaction_with_healthcare_support_at_preg, Low_mood_while_preg, Stress_in_preg, Intent_BF, Smoking, Alcohol)
+```
+
+
+### Shuffle the data
+```{r}
+shuffle_index <- sample(1:nrow(dt))
+dt <- dt[shuffle_index, ]
+head(dt)
+```
+
+
+```{r}
+dt <- dt %>%
+mutate(Intent_BF = factor(Intent_BF, levels = c(0, 1), labels = c('No Intent', 'Has Intent')))
+```
+
+
+### Remove all NAs
+```{r}
+dt <- dt %>% select(-Patient_ID) %>% na.omit()
+```
+
+
+### Split data into Train (80%) and Test sets (20%)
+```{r}
+bound <- nrow(dt)*0.80 #Split 80% of the data to be trained
+dt_Train <- dt[1:bound,] #Get training set
+dt_Test <- dt[(bound+1):nrow(dt),] #Get testing set
+```
+
+### Let's train the data and draw decision tree
+```{r}
+fit <- rpart(Intent_BF ~., data = dt_Train, method = 'class',
+             parms=list(loss=matrix(c(0,1,2,0),2)))
+
+rpart.plot(fit, type = 1, extra = 106, under = TRUE, tweak = 1.5, gap = 0, clip.right.labs = FALSE, clip.facs = TRUE, split.prefix = "is ", split.suffix = "?", eq = " ", facsep = " or ")
+
+#save the decision tree as png. file
+png("decision-tree.png", width=1000, height=800, antialias="cleartype")
+rpart.plot(fit, main="Classification Tree")
+dev.off()
+
+```
+
+
+### Let's make prediction using test data
+```{r}
+prediction <- predict(fit, dt_Test, type = 'class')
+
+confusionMatrix(table(Observed = dt_Test$Intent_BF, Predicted = prediction))
+
+```
+#Here we can see the results of our confusion matrix but the positive class is not right. Let's solve this.
+
+
+### See levels of Breastfeeding intent
+```{r}
+levels(dt_Train$Intent_BF)
+```
+#No intent comes first, that why it was selected as the positive class by the confusion matrix, so we will relevel the factor
+
+
+```{r}
+dt_Train$Intent_BF <- fct_relevel(dt_Train$Intent_BF, 'Has Intent', 'No Intent')
+
+dt_Test$Intent_BF <- fct_relevel(dt_Test$Intent_BF, 'Has Intent', 'No Intent')
+
+levels(dt_Test$Intent_BF)
+```
+
+
+### Now let's run the model again
+```{r}
+fit <- rpart(Intent_BF ~., data = dt_Train, method = 'class')
+
+prediction <- predict(fit, dt_Test, type = 'class')
+
+confusionMatrix(table(Observed = dt_Test$Intent_BF, Predicted = prediction))
+
+```
+
+
+

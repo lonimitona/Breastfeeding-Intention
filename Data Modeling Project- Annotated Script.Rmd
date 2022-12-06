@@ -1,12 +1,14 @@
 ---
-title: "Assignment A2 - Annotated Script"
-author: '2149508'
+title: "Data Modeling Project"
+author: Oluwalonimi Laditan
 date: '2022-07-11'
 output:
   word_document: default
   html_document: default
 ---
 
+
+### Load all the needed packages
 ```{r}
 library(tidyverse) #set of packages for performing statistical transformations with data
 library(lubridate) #for parsing date-time data

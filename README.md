@@ -4,7 +4,7 @@ This project analyzes data from pregnant women in Wales to understand the factor
 
 **What the Project Does**
 
-- Data Import & Cleaning:
+- **Data Import & Cleaning:**
 The project starts by reading a CSV file containing demographic, clinical, and psychosocial data. Date variables are converted into proper formats and continuous variables, such as weight and height are processed (for example, calculating BMI). Irrelevant columns are removed, and categorical variables are recoded to prepare the data for analysis. 
 
 - Exploratory Data Analysis (EDA):

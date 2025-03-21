@@ -11,7 +11,7 @@ I started by importing a CSV file that included demographic, clinical, and psych
 Next, I explored the data through summary statistics and tables. A big focus during this phase was on the breastfeeding intent variable, ensuring it was clean and well-defined for the predictive modeling step.
 
 - **Predictive Modeling:**
-ATo better understand what predicts breastfeeding intent, I built a decision tree using the rpart package. I split the data into training and testing sets (80/20), and then visualized the decision tree with rpart.plot. I evaluated the model using a confusion matrix, which gave insights into accuracy and sensitivity.
+To better understand what predicts breastfeeding intent, I built a decision tree using the rpart package. I split the data into training and testing sets (80/20), and then visualized the decision tree with rpart.plot. I evaluated the model using a confusion matrix, which gave insights into accuracy and sensitivity.
 
 - **Survival Analysis & Cox Regression:**
 I also had access to follow-up data that captured how long mothers continued breastfeeding. I used Kaplan-Meier survival curves and Cox proportional hazards regression to understand what factors might influence the duration of breastfeeding. The survival models helped me look beyond just intent—to actual behavioral outcomes over time.

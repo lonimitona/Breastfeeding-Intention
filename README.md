@@ -16,7 +16,7 @@ ATo better understand what predicts breastfeeding intent, I built a decision tre
 - **Survival Analysis & Cox Regression:**
 I also had access to follow-up data that captured how long mothers continued breastfeeding. I used Kaplan-Meier survival curves and Cox proportional hazards regression to understand what factors might influence the duration of breastfeeding. The survival models helped me look beyond just intent—to actual behavioral outcomes over time.
 
-** Why I Did This**
+**Why I Did This**
 
 - **Insight Generation:**
 I was curious about what factors—whether clinical, social, or psychological—influence a mother’s choice and ability to breastfeed. I wanted to go beyond simple correlations and uncover patterns that might help shape future public health programs or interventions.

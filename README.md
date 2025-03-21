@@ -1,47 +1,42 @@
 **Overview**
 
-This project analyzes data from pregnant women in Wales to understand the factors that influence their intent to breastfeed. The analysis follows a full data science workflow—from data import and cleaning, through exploratory analysis, to predictive modeling and survival analysis. In addition to building a decision tree to predict breastfeeding intent, the project utilizes follow‐up data to perform survival analysis and Cox regression to investigate time‐to-event outcomes.
+This project explores the factors influencing pregnant women's intention to breastfeed in Wales. This analysis allowed me to apply a full data science workflow—from data cleaning and exploratory analysis all the way through to predictive modeling and survival analysis.
 
-**What the Project Does**
+**What I did**
 
 - **Data Import & Cleaning:**
-The project starts by reading a CSV file containing demographic, clinical, and psychosocial data. Date variables are converted into proper formats and continuous variables, such as weight and height are processed (for example, calculating BMI). Irrelevant columns are removed, and categorical variables are recoded to prepare the data for analysis. 
+I started by importing a CSV file that included demographic, clinical, and psychosocial information from a cohort of pregnant women. I cleaned and preprocessed the dataset by converting date variables, calculating BMI from height and weight, removing irrelevant columns, and recoding categorical variables to prepare for analysis.
 
 - **Exploratory Data Analysis (EDA):**
-Summary statistics and tables are generated to examine data distributions, missing values, and variable recoding. Special attention is given to the breastfeeding intent variable to ensure it is properly configured for subsequent modeling.
+Next, I explored the data through summary statistics and tables. A big focus during this phase was on the breastfeeding intent variable, ensuring it was clean and well-defined for the predictive modeling step.
 
 - **Predictive Modeling:**
-A decision tree is built using the rpart package to predict whether a mother intends to breastfeed. The dataset is split into training (80%) and testing (20%) sets, and the tree is visualized with rpart.plot. Model performance is evaluated using a confusion matrix, providing metrics such as accuracy and sensitivity.
+ATo better understand what predicts breastfeeding intent, I built a decision tree using the rpart package. I split the data into training and testing sets (80/20), and then visualized the decision tree with rpart.plot. I evaluated the model using a confusion matrix, which gave insights into accuracy and sensitivity.
 
 - **Survival Analysis & Cox Regression:**
-Using follow‐up data, the project also investigates time‐to-event outcomes with survival analysis. The follow‐up information (e.g., duration until an event like breastfeeding cessation) is analyzed using Kaplan–Meier survival curves and Cox proportional hazards regression. This Cox regression helps assess the impact of various predictor variables (e.g. full time employment) on the hazard rate, while the survival and survminer packages are used to fit the model and create visualizations.
+I also had access to follow-up data that captured how long mothers continued breastfeeding. I used Kaplan-Meier survival curves and Cox proportional hazards regression to understand what factors might influence the duration of breastfeeding. The survival models helped me look beyond just intent—to actual behavioral outcomes over time.
 
-**Why This Analysis Was Done**
+** Why I Did This**
 
 - **Insight Generation:**
-The analysis seeks to identify key factors that influence a mother's decision to breastfeed and to understand how these factors affect outcomes over time.
+I was curious about what factors—whether clinical, social, or psychological—influence a mother’s choice and ability to breastfeed. I wanted to go beyond simple correlations and uncover patterns that might help shape future public health programs or interventions.
 
-- **End-to-End Demonstration:**
-The project demonstrates a complete and reproducible data analysis workflow—from cleaning raw data and performing EDA to predictive and survival modeling.
+More importantly, this project gave me the opportunity to walk through the full data lifecycle, from messy raw files to meaningful insights—something I deeply enjoy.
 
-- **Practical Impact:**
-By revealing insights from both cross-sectional and follow-up data, the study may help inform future public health interventions in maternal and infant care.
+**Tools I Used**
 
-**Tools and Technologies**
-
-- R & RStudio: For writing and executing the analysis.
-- Tidyverse: For data manipulation and visualization.
-- Lubridate: For date-time data processing.
-- rpart & rpart.plot: For decision tree modeling and visualization.
-- Caret: For evaluating model performance.
-- Survival & survminer: For conducting survival analysis and Cox regression.
+- R & RStudio: My go-to tools for analysis and scripting
+- Tidyverse: For data wrangling and visualization
+- Lubridate: For handling messy date-time data
+- rpart & rpart.plot: To build and visualize the decision tree
+- Caret: For model evaluation
+- Survival & survminer: For running and visualizing survival analysis
 - Table1 & gtsummary: For creating descriptive tables.
   
-**Conclusion**
+**What I Learned**
 
-The analysis revealed that certain factors strongly influence both the intent to breastfeed and the timing of subsequent events. The decision tree model established that variables such as BMI, maternal age, and key demographic features significantly impact a mother's breastfeeding intent. 
+One major takeaway was how predictive factors like BMI, maternal age, and employment status shaped the intention to breastfeed. But beyond that, survival analysis showed me something deeper: stress levels and lower socioeconomic status significantly increased the likelihood of early breastfeeding cessation. On the flip side, older age and a healthier BMI seemed to act as protective factors.
 
-Also, the survival analysis provided deeper insights: Cox regression results demonstrated that higher stress levels and lower socioeconomic status were associated with an increased hazard rate, meaning these factors tend to shorten the time until events (such as breastfeeding cessation or other adverse outcomes) occur. On the contrary, higher maternal age and a healthier BMI profile were linked to longer durations before such events, suggesting a protective effect.
+**So, Why Does This Matter?**
 
-These findings offer actionable insights for healthcare professionals and public health policymakers. By identifying mothers who are at greater risk for early adverse outcomes, tailored support programs and interventions can be developed to promote sustained breastfeeding and improve maternal and infant health outcomes.
-
+Public health efforts around maternal and infant care often focus on promotion, but tailored support is where impact really happens. Insights from this project could help identify mothers at higher risk of early breastfeeding drop-off, allowing healthcare professionals to offer personalized interventions that actually make a difference.
